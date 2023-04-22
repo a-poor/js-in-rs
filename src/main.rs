@@ -32,21 +32,26 @@ fn main() -> Result<()> {
     let raw = std::fs::read_to_string(args.file_path)?;
     
     // Parse the matcher...
-    let mut runtime = JsRuntime::new(RuntimeOptions::default());
+    let mut runtime = JsRuntime::new(
+        RuntimeOptions::default(),
+    );
 
     for line in raw.lines() {
-        // println!("Line: {}", line);
-
         // Serialize the line...
         let s = serde_json::to_string(&line)?;
 
         // Format the JS...
-        let js_matcher = format!("!!((line) => {})({})", args.js_matcher.clone().trim(), s);
-        // println!("JS: {}", js_matcher);
+        let js_matcher = format!(
+            "!!((line) => {})({})", 
+            args.js_matcher.clone().trim(), 
+            s,
+        );
 
         // Run the JS...
-        let result = runtime.execute_script("matcher.js", js_matcher.into());
-        // println!("Result: {:?}", result);
+        let result = runtime.execute_script(
+            "matcher.js", 
+            js_matcher.into(),
+        );
 
         match result {
             Ok(global) => {
@@ -62,10 +67,14 @@ fn main() -> Result<()> {
                                     println!("{}", line);
                                 }
                             },
-                            _ => return Err(Error::msg(format!("JS matcher must return a boolean value!"))),
+                            _ => return Err(Error::msg(format!(
+                                "JS matcher must return a boolean value!",
+                            ))),
                         }
                     },
-                    Err(err) => return Err(Error::msg(format!("Cannot deserialize value: {err:?}"))),
+                    Err(err) => return Err(Error::msg(
+                        format!("Cannot deserialize value: {err:?}"),
+                    )),
                 }
             },
             Err(e) => {
